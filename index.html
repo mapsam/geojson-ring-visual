@@ -1,0 +1,253 @@
+<html lang="en">
+<head>
+  <title>hello world</title>
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <style>
+  body {
+    padding:0;
+    margin:0;
+  }
+  </style>
+</head>
+<body>
+  <p>Waka!</p>
+  <script>
+  function init() {
+    // flaka  
+  }
+  window.onload = init;
+  </script>
+</body>
+</html>
+
+<html lang="en">
+<head>
+  <title>hello world</title>
+  <script src='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.css' rel='stylesheet' />
+  <style>
+  * {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  body {
+    padding:0;
+    margin:0;
+    overflow: hidden;
+  }
+  a {
+    text-decoration: underline;
+    color: black;
+  }
+  #map,
+  #code,
+  #help {
+    position: absolute;
+    width: 50%;
+    overflow: scroll;
+  }
+  #map {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+  #code {
+    bottom: 0;
+    top: 200px;
+    right: 0;
+  }
+  #help {
+    top: 0;
+    height: 200px;
+    right: 0;
+    border-bottom: 1px solid #c0c0c0;
+    padding: 20px;
+    font-family: monospace;
+    font-size: 1.2em;
+  }
+  pre {
+    margin: 20px;
+    font-size: 1em;
+  }
+  .active,
+  .poly {
+    background: #ccffe2;
+  }
+  .ring,
+  .outer-ring,
+  .inner-ring {
+    display: inline-block;
+    padding-right: 20px;
+    position: relative;
+  }
+  .ring.active .outer-ring,
+  .exterior {
+    background: #01FF70;
+  }
+  .ring.active .inner-ring,
+  .interior {
+    background: #ffb2dd;
+  }
+
+  .ring.active .outer-ring:after,
+  .ring.active .inner-ring:after {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 2px;
+    padding: 3px;
+    font-family: monospace;
+    font-weight: 900;
+  }
+  .ring.active .outer-ring:after {
+    content: "Exterior Ring";
+    background: #01FF70;
+  }
+  .ring.active .inner-ring:after {
+    content: "Interior Ring";
+    background: #ffb2dd;
+  }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="help">
+    GeoJSON <a href="http://geojson.org/geojson-spec.html#polygon"><span class="poly">polygons</span></a> are represented via arrays of latitude and longitude pairs. In order to represent <a href="http://geojson.org/geojson-spec.html#multipolygon">MultiPolygons</a> or Polygons with "holes", arrays should be rendered in a particular order.<br><br>
+
+    For Polygons with multiple rings, the first must be the <span class="exterior">exterior</span> ring and any others must be <span class="interior">interior</span> rings or holes.<br><br>
+
+    <small>Definitions from <a href="http://geojson.org/">geojson.org</a></small>
+  </div>
+  <div id="code">
+    <pre><code>{
+  "type": "Feature",
+  "geometry": { 
+    "type": "MultiPolygon",
+    "coordinates": [
+      <span id="one" class="ring">[
+  <span class="outer-ring">[
+  [102.0, 2.0], 
+  [103.0, 2.0], 
+  [103.0, 3.0], 
+  [102.0, 3.0], 
+  [102.0, 2.0]
+]</span>
+],</span>
+      <span id="two" class="ring">[
+  <span class="outer-ring">[
+  [100.0, 0.0], 
+  [101.0, 0.0], 
+  [101.0, 1.0], 
+  [100.0, 1.0], 
+  [100.0, 0.0]
+],</span>
+  <span class="inner-ring">[
+  [100.2, 0.2], 
+  [100.8, 0.2], 
+  [100.8, 0.8], 
+  [100.2, 0.8], 
+  [100.2, 0.2]
+]</span>
+]</span>
+    ]
+  },
+  "properties": {
+    "name": "Dinagat Islands"
+  }
+};</code></pre>
+  </div>
+  <script>
+  /**
+   ** Data
+   **/
+  var gj =
+  {
+    "type": "Feature",
+    "geometry": { 
+      "type": "MultiPolygon",
+      "coordinates": [
+        [[[102.0, 2.0],[103.0, 2.0],[103.0, 3.0],[102.0, 3.0],[102.0, 2.0]]],
+        [[[100.0, 0.0],[101.0, 0.0],[101.0, 1.0],[100.0, 1.0],[100.0, 0.0]],
+         [[100.2, 0.2],[100.8, 0.2],[100.8, 0.8],[100.2, 0.8],[100.2, 0.2]]]
+      ]
+    },
+    "properties": {
+      "name": "Dinagat Islands"
+    }
+  };
+
+  // hacky inner polygon so we can style differently (just for visuals)
+  var gjInner =
+  {
+    "type": "Feature",
+    "geometry": { 
+      "type": "Polygon",
+      "coordinates": [
+        [[100.2, 0.2],[100.8, 0.2],[100.8, 0.8],[100.2, 0.8],[100.2, 0.2]]
+      ]
+    }
+  };
+
+
+  /**
+   ** Styles
+   **/
+  var hoverStyle = { fillColor: '#ccffe2', color: '#01FF70', fillOpacity: 0.8, weight: 5 },
+      defaultStyle = { fillColor: '#000000', fillOpacity: 0.5, weight: 0 },
+      innerDefaultStyle = { fillOpacity: 0, opacity: 0, weight: 0 },
+      innerHoverStyle = { color: '#ffb2dd', opacity: 1, weight: 5 };
+
+
+  /**
+   ** Map
+   **/
+  L.mapbox.accessToken = 'pk.eyJ1Ijoic3ZtYXR0aGV3cyIsImEiOiJVMUlUR0xrIn0.NweS_AttjswtN5wRuWCSNA';
+  var map = L.mapbox.map('map', 'mapbox.light', {zoomControl: false});
+  
+
+  /**
+   ** Feature layers
+   **/
+  var fl = L.mapbox.featureLayer();
+  fl.setGeoJSON(gj).addTo(map);
+  fl.setStyle(defaultStyle);
+  
+  var flInner = L.mapbox.featureLayer();
+  flInner.setGeoJSON(gjInner).addTo(map);
+  flInner.setStyle(innerDefaultStyle);
+  
+
+  /**
+   ** Fit bounds and disable all
+   **/
+  map.fitBounds(fl.getBounds());
+  map.dragging.disable();
+  map.touchZoom.disable();
+  map.doubleClickZoom.disable();
+  map.scrollWheelZoom.disable();
+  map.keyboard.disable();
+
+
+  /**
+   ** Events
+   **/
+  fl.on('mouseover', function(e) {
+    if(e.layer._holes.length) {
+      $('#two').addClass('active');
+      flInner.setStyle(innerHoverStyle);
+    } else {
+      $('#one').addClass('active');
+    }
+    e.layer.setStyle(hoverStyle);
+  });
+
+  fl.on('mouseout', function(e) {
+    $('.ring').removeClass('active');
+    fl.setStyle(defaultStyle);
+    flInner.setStyle(innerDefaultStyle);
+  });
+  </script>
+</body>
+</html>
