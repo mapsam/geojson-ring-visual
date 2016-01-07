@@ -65,7 +65,7 @@
     border-bottom: 1px solid #c0c0c0;
     padding: 20px;
     font-family: monospace;
-    font-size: 1.2em;
+    font-size: 1.15em;
   }
   pre {
     margin: 20px;
@@ -114,11 +114,10 @@
 <body>
   <div id="map"></div>
   <div id="help">
-    GeoJSON <a href="http://geojson.org/geojson-spec.html#polygon"><span class="poly">polygons</span></a> are represented via arrays of latitude and longitude pairs. In order to represent <a href="http://geojson.org/geojson-spec.html#multipolygon">MultiPolygons</a> or Polygons with "holes", arrays should be rendered in a particular order.<br><br>
+    <a href="http://geojson.org/">GeoJSON</a> <span class="poly">polygons</span> are comprised of a series of rings, which are arrays of points (latitude & longitude pairs) like [100.1, 2.0]. Polygons typically have a single ring that represents the entity entirely.<br><br>
 
     For Polygons with multiple rings, the first must be the <span class="exterior">exterior</span> ring and any others must be <span class="interior">interior</span> rings or holes.<br><br>
-
-    <small>Definitions from <a href="http://geojson.org/">geojson.org</a></small>
+    <strong>Hover over the polygons on the map to highlight their respective arrays below.</strong>
   </div>
   <div id="code">
     <pre><code>{
